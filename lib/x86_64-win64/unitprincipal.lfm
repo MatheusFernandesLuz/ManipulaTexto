@@ -1,25 +1,25 @@
 object Principal: TPrincipal
-  Left = 390
-  Height = 335
-  Top = 168
-  Width = 545
+  Left = 488
+  Height = 115
+  Top = 293
+  Width = 303
   Caption = 'Principal'
-  ClientHeight = 335
-  ClientWidth = 545
+  ClientHeight = 115
+  ClientWidth = 303
   LCLVersion = '1.8.4.0'
   object btCarregar: TButton
-    Left = 336
+    Left = 48
     Height = 33
-    Top = 16
+    Top = 40
     Width = 91
     Caption = 'Carregar CSV'
     OnClick = btCarregarClick
     TabOrder = 0
   end
   object btSalvar: TButton
-    Left = 432
+    Left = 168
     Height = 33
-    Top = 16
+    Top = 40
     Width = 91
     Caption = 'Salvar HTML'
     TabOrder = 1

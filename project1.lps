@@ -12,26 +12,63 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="29"/>
       </Unit0>
       <Unit1>
         <Filename Value="unitprincipal.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="Principal"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="unitPrincipal"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="26"/>
-        <CursorPos X="18" Y="41"/>
-        <UsageCount Value="20"/>
+        <TopLine Value="25"/>
+        <CursorPos X="28" Y="35"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="unitprincipal.pas"/>
       </Position1>
+      <Position2>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="44" Column="29" TopLine="29"/>
+      </Position2>
+      <Position3>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="46" Column="12" TopLine="32"/>
+      </Position3>
+      <Position4>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="76" Column="45" TopLine="29"/>
+      </Position4>
+      <Position5>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="50" Column="29" TopLine="40"/>
+      </Position5>
+      <Position6>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="71" Column="10" TopLine="61"/>
+      </Position6>
+      <Position7>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="76" Column="22" TopLine="62"/>
+      </Position7>
+      <Position8>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="36" Column="31" TopLine="29"/>
+      </Position8>
+      <Position9>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="61" Column="33" TopLine="47"/>
+      </Position9>
+      <Position10>
+        <Filename Value="unitprincipal.pas"/>
+        <Caret Line="62" Column="14" TopLine="47"/>
+      </Position10>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
