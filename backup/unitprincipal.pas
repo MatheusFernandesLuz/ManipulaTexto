@@ -30,21 +30,40 @@ implementation
 
 {$R *.lfm}
 
-procedure VerificaLinha(linha: String);
+procedure separaCampos(delimitador: array of Integer; linha: String);
 var
-  i: integer;
+  i, inicio, fim: Integer;
   campo: String;
 begin
-  campo:= '';
-  for i:=0 to linha.Length do
+  inicio:=0;
+  fim:=0;
+  for i:=inicio to linha.Length do
   begin
-    if linha.Chars[i+1] <> '' then campo:= campo+linha.Chars[i+1]
-    else break;
+    campo:= Copy(linha, inicio+1, delimitador[fim]-2);
+    inicio:=delimitador[fim];
+    Inc(fim);
   end;
   ShowMessage(campo);
 end;
 
-procedure importaArquivo();
+procedure VerificaLimites(linha: String);
+var
+  i, cont: integer;
+  delimitador: array[0..3] of Integer;
+begin
+  cont:=0;
+  for i:=0 to linha.Length do
+  begin
+    if (linha.Chars[i] = ';') then
+    begin
+      delimitador[cont]:= i;
+      Inc(cont);
+    end
+  end;
+  separaCampos(delimitador, linha);
+end;
+
+procedure leArquivo();
 var
   arquivoOrigem: TStringList;
   i: integer;
@@ -56,7 +75,7 @@ begin
     i:=0;
     while i <= arquivoOrigem.Count-1 do
     begin
-      VerificaLinha(arquivoOrigem[i]);
+      VerificaLimites(arquivoOrigem[i]);
       Inc(i);
     end;
   finally
@@ -80,7 +99,7 @@ begin
     open.Free;
   end;
 
-  if FileExists(nomeArquivo) then importaArquivo()
+  if FileExists(nomeArquivo) then leArquivo()
   else ShowMessage('Arquivo Inválido');
 
 end;
