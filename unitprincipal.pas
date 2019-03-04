@@ -5,7 +5,8 @@ unit unitPrincipal;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Menus, dateutils;
 
 type
 
@@ -13,8 +14,14 @@ type
 
   TPrincipal = class(TForm)
     btCarregar: TButton;
+    btSelecionar: TButton;
     btSalvar: TButton;
+    Edit1: TEdit;
+    Label1: TLabel;
     procedure btCarregarClick(Sender: TObject);
+    procedure btSalvarClick(Sender: TObject);
+    procedure btSelecionarClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   public
@@ -25,42 +32,84 @@ var
   Principal: TPrincipal;
   nomeArquivo: String;
   arquivoDestino: TStringList;
+  lista: TStringList;
 
 implementation
 
 {$R *.lfm}
 
-procedure separaCampos(delimitador: array of Integer; linha: String);
-var
-  i, inicio, fim: Integer;
-  campo: String;
+procedure SalvarArquivoDestino(local: String);
 begin
-  inicio:=0;
-  fim:=0;
-  for i:=inicio to linha.Length do
-  begin
-    campo:= Copy(linha, inicio+2, delimitador[fim]-2);
-    inicio:=delimitador[fim];
-    Inc(fim);
-  end;
-  ShowMessage(campo);
+  arquivoDestino.SaveToFile(local+'\extrato.html');
 end;
 
-procedure VerificaLimites(linha: String);
-var
-  i, cont: integer;
-  delimitador: array[0..3] of Integer;
+procedure CriaTabela();
 begin
-  cont:=0;
+
+ arquivoDestino.add('<!DOCTYPE html>');
+ arquivoDestino.add('<html>');
+ arquivoDestino.add('<head>');
+ arquivoDestino.add('<meta charset="utf-8">');
+ arquivoDestino.add('<title> Extrato bancário </title>');
+ arquivoDestino.add('</head>');
+ arquivoDestino.add('<body>');
+ arquivoDestino.add('<h2> EXTRATO BANCÁRIO </h2>');
+ arquivoDestino.add('<table>');
+ arquivoDestino.add('<thead style="color: white; background-color: black;">');
+ arquivoDestino.add('<tr>');
+ arquivoDestino.add('<th style="width: 100px; text-align: center;"> Data </th>');
+ arquivoDestino.add('<th style="width: 100px; text-align: center;"> Documento </th>');
+ arquivoDestino.add('<th style="width: 600px; text-align: center;"> Histórico </th>');
+ arquivoDestino.add('<th style="width: 100px; text-align: center;"> Valor </th>');
+ arquivoDestino.add('<th style="width: 100px; text-align: center;"> Saldo </th>');
+ arquivoDestino.add('</tr>');
+ arquivoDestino.add('</thead>');
+ arquivoDestino.add('<tbody>');
+
+end;
+
+procedure ValidarDados(campos: array of String);
+var
+ Data:TDateTime;
+ valida: Boolean;
+ i: Integer;
+begin
+  valida:= false;
+  if TryStrToDate(campos[0], Data, 'yy-mm-dd', '/') then
+  begin
+   if (campos[1] = '') then
+   begin
+    if (campos[2] = 'SALDO') or (campos[2] = 'SALDO ANTERIOR') then
+     valida:=true;
+   end
+   else valida:=true;
+  end;
+
+  if valida = true then
+  begin
+    arquivoDestino.Add('<tr>');
+    arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + campos[0] + '</td>');
+    arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + campos[1] + '</td>');
+    arquivoDestino.Add('<td style="border: solid 1px black; text-align: left;">' + campos[2] + '</td>');
+    arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + campos[3] + '</td>');
+    arquivoDestino.Add('<td style="border: solid 1px black; text-align: center; background-color: lightgray;"><b>' + campos[4] + '</b></td>');
+    arquivoDestino.Add('</tr>');
+  end;
+
+end;
+
+procedure SeparaCampos(linha: String);
+var
+  i, j: integer;
+  campos: array[0..4] of String;
+begin
+  j:=0;
   for i:=0 to linha.Length do
   begin
-    if (linha.Chars[i] = ';') then
-    begin
-      delimitador[cont]:= i;
-      Inc(cont);
-    end
+    if (linha.Chars[i] <> ';') and (linha.Chars[i] <> '"')  then campos[j]:= campos[j]+linha.Chars[i]
+    else if linha.Chars[i] <> '"' then Inc(j);
   end;
-  separaCampos(delimitador, linha);
+  ValidarDados(campos);
 end;
 
 procedure leArquivo();
@@ -72,12 +121,14 @@ begin
 
   try
     arquivoOrigem.LoadFromFile(nomeArquivo);
+    CriaTabela();
     i:=0;
     while i <= arquivoOrigem.Count-1 do
     begin
-      VerificaLimites(arquivoOrigem[i]);
+      SeparaCampos(arquivoOrigem[i]);
       Inc(i);
     end;
+    Principal.btSalvar.Enabled:=true;
   finally
     arquivoOrigem.Free;
   end;
@@ -103,6 +154,31 @@ begin
   else ShowMessage('Arquivo Inválido');
 
 end;
+
+procedure TPrincipal.btSalvarClick(Sender: TObject);
+begin
+  if (Edit1.Text = '') then Edit1.Text:=Edit1.TextHint;
+  SalvarArquivoDestino(Edit1.Text);
+end;
+
+procedure TPrincipal.btSelecionarClick(Sender: TObject);
+var
+  open: TOpenDialog;
+begin
+  try
+    open:= TOpenDialog.Create(nil);
+    open.Execute;
+    Edit1.Text:= open.FileName;
+  finally
+    open.Free;
+  end;
+end;
+
+procedure TPrincipal.FormCreate(Sender: TObject);
+begin
+  arquivoDestino:= TStringList.Create;
+end;
+
 
 end.
 
