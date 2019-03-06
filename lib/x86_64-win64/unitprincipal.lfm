@@ -1,19 +1,19 @@
 object Principal: TPrincipal
-  Left = 410
-  Height = 83
-  Top = 282
-  Width = 498
+  Left = 274
+  Height = 106
+  Top = 236
+  Width = 399
   Caption = 'Principal'
-  ClientHeight = 83
-  ClientWidth = 498
+  ClientHeight = 0
+  ClientWidth = 0
   OnCreate = FormCreate
   LCLVersion = '1.8.4.0'
   Visible = True
   object btCarregar: TButton
-    Left = 328
-    Height = 25
-    Top = 16
-    Width = 155
+    Left = 200
+    Height = 23
+    Top = 72
+    Width = 88
     Caption = 'Carregar CSV'
     OnClick = btCarregarClick
     TabOrder = 0
@@ -21,7 +21,7 @@ object Principal: TPrincipal
   object Label1: TLabel
     Left = 16
     Height = 15
-    Top = 24
+    Top = 8
     Width = 54
     Caption = 'Salvar em:'
     ParentColor = False
@@ -29,25 +29,25 @@ object Principal: TPrincipal
   object Edit1: TEdit
     Left = 16
     Height = 23
-    Top = 48
-    Width = 304
+    Top = 32
+    Width = 368
     TabOrder = 1
     TextHint = 'C:\dowloads'
   end
   object btSelecionar: TButton
-    Left = 328
+    Left = 112
     Height = 23
-    Top = 48
-    Width = 75
+    Top = 72
+    Width = 80
     Caption = 'Selecionar'
     OnClick = btSelecionarClick
     TabOrder = 2
   end
   object btSalvar: TButton
-    Left = 408
+    Left = 296
     Height = 23
-    Top = 48
-    Width = 75
+    Top = 72
+    Width = 88
     Caption = 'Salvar'
     Enabled = False
     OnClick = btSalvarClick

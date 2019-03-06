@@ -32,7 +32,7 @@ var
   Principal: TPrincipal;
   nomeArquivo: String;
   arquivoDestino: TStringList;
-  lista: TStringList;
+  cont: Integer;
 
 implementation
 
@@ -40,12 +40,20 @@ implementation
 
 procedure SalvarArquivoDestino(local: String);
 begin
-  arquivoDestino.SaveToFile(local+'\extrato.html');
+  try
+    try
+      arquivoDestino.SaveToFile(local+'\extrato.html');
+      ShowMessage('Salvo com sucesso');
+    except
+      ShowMessage('Não foi possível salvar o arquivo.');
+    end;
+  finally
+    arquivoDestino.Free;
+  end;
 end;
 
 procedure CriaTabela();
 begin
-
  arquivoDestino.add('<!DOCTYPE html>');
  arquivoDestino.add('<html>');
  arquivoDestino.add('<head>');
@@ -72,11 +80,29 @@ procedure ValidarDados(campos: array of String);
 var
  Data:TDateTime;
  valida: Boolean;
- i: Integer;
+ valor, saldo: Double;
+ separadorDec, color: String;
 begin
   valida:= false;
   if TryStrToDate(campos[0], Data, 'yy-mm-dd', '/') then
   begin
+   try
+     separadorDec:=DecimalSeparator;
+     DecimalSeparator:=',';
+     valor: StrToFloat(campos[3]);
+     saldo: StrToFloat(campos[4]);
+
+     if valor < 0 then
+     begin
+      color:=clRed;
+     end;
+
+     campos[3]:= FormatFloat('#.##0.00', valor);
+     campos[4]:= FormatFloat('#.##0.00', saldo);
+   finally
+     DecimalSeparator:=separadorDec;
+   end;
+
    if (campos[1] = '') then
    begin
     if (campos[2] = 'SALDO') or (campos[2] = 'SALDO ANTERIOR') then
@@ -87,6 +113,7 @@ begin
 
   if valida = true then
   begin
+    Inc(cont);
     arquivoDestino.Add('<tr>');
     arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + campos[0] + '</td>');
     arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + campos[1] + '</td>');
@@ -128,7 +155,13 @@ begin
       SeparaCampos(arquivoOrigem[i]);
       Inc(i);
     end;
+    if cont < 1 then
+    begin
+     ShowMessage('Arquivo de entrada inválido.');
+     Exit;
+    end;
     Principal.btSalvar.Enabled:=true;
+    Principal.btSalvar.SetFocus;
   finally
     arquivoOrigem.Free;
   end;
@@ -151,14 +184,14 @@ begin
   end;
 
   if FileExists(nomeArquivo) then leArquivo()
-  else ShowMessage('Arquivo Inválido');
+  else ShowMessage('Selecione um arquivo válido.');
 
 end;
 
 procedure TPrincipal.btSalvarClick(Sender: TObject);
 begin
-  if (Edit1.Text = '') then Edit1.Text:=Edit1.TextHint;
-  SalvarArquivoDestino(Edit1.Text);
+  if (Edit1.Text = '') then SalvarArquivoDestino(Edit1.TextHint)
+  else SalvarArquivoDestino(Edit1.Text);
 end;
 
 procedure TPrincipal.btSelecionarClick(Sender: TObject);
