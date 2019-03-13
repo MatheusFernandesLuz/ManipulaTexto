@@ -4,17 +4,17 @@ object Principal: TPrincipal
   Top = 267
   Width = 405
   Caption = 'Principal'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 178
+  ClientWidth = 405
   LCLVersion = '1.8.4.0'
   Visible = True
-  object btCarregar: TButton
+  object btCarregarCsv: TButton
     Left = 312
     Height = 23
     Top = 88
     Width = 80
     Caption = 'Selecionar'
-    OnClick = btCarregarClick
+    OnClick = btCarregarCsvClick
     TabOrder = 0
   end
   object Label1: TLabel
@@ -33,13 +33,13 @@ object Principal: TPrincipal
     TabOrder = 1
     TextHint = 'C:\dowloads'
   end
-  object btSelecionar: TButton
+  object btSelecionarPasta: TButton
     Left = 312
     Height = 23
     Top = 32
     Width = 80
     Caption = 'Selecionar'
-    OnClick = btSelecionarClick
+    OnClick = btSelecionarPastaClick
     TabOrder = 2
   end
   object btSalvar: TButton

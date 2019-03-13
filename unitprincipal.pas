@@ -13,16 +13,16 @@ type
   { TPrincipal }
 
   TPrincipal = class(TForm)
-    btCarregar: TButton;
-    btSelecionar: TButton;
+    btCarregarCsv: TButton;
+    btSelecionarPasta: TButton;
     btSalvar: TButton;
     Edit1: TEdit;
     Edit2: TEdit;
     Label1: TLabel;
     Label2: TLabel;
-    procedure btCarregarClick(Sender: TObject);
+    procedure btCarregarCsvClick(Sender: TObject);
     procedure btSalvarClick(Sender: TObject);
-    procedure btSelecionarClick(Sender: TObject);
+    procedure btSelecionarPastaClick(Sender: TObject);
   private
 
   public
@@ -31,34 +31,18 @@ type
 
 var
   Principal: TPrincipal;
-  nomeArquivo: String;
+  arquivoOrigem: TStringList;
   arquivoDestino: TStringList;
-  cont: Integer;
+  numLinhasTabela: Integer;
 
 implementation
 
 {$R *.lfm}
 
-procedure SalvarArquivoDestino(local: String);
-var
-  data, hora: String;
-begin
-
-  data:= StringReplace(DateToStr(Date()), '/', '.', [rfReplaceAll]);
-  hora:= StringReplace(TimeToStr(Time()), ':', '.', [rfReplaceAll]);
-
-  try
-   arquivoDestino.SaveToFile(local+'\EXTRATO - ' + data  + ' - ' + hora + '.html');
-   ShowMessage('Arquivo Salvo');
-  finally
-   arquivoDestino.Free;
-   cont:=0;
-  end;
-end;
-
-procedure CriaTabela();
+procedure CriaCabecalho();
 begin
   arquivoDestino:= TStringList.Create;
+  numLinhasTabela:=0;
 
   arquivoDestino.add('<!DOCTYPE html>');
   arquivoDestino.add('<html>');
@@ -91,10 +75,10 @@ begin
   arquivoDestino.Add('<td style="border: solid 1px black; text-align: center;">' + valor + '</td>');
   arquivoDestino.Add('<td style="border: solid 1px black; text-align: center; background-color:' + color + '"><b>' + saldo + '</b></td>');
   arquivoDestino.Add('</tr>');
-  Inc(cont);
+  Inc(numLinhasTabela);
 end;
 
-function ModificaValor(numero: String): String;
+function ModificaFormato(numero: String): String;
 var
   separadorDec: Char;
   aux: Double;
@@ -106,29 +90,33 @@ begin
     FormatSettings.DecimalSeparator:='.';
     aux:= StrToFloat(numero);
     FormatSettings.DecimalSeparator:=',';
-    ModificaValor:= FormatFloat('#,##0.00', aux);
+    ModificaFormato:= FormatFloat('R$ #,##0.00', aux);
   finally
     FormatSettings.DecimalSeparator:= separadorDec;
   end;
 
 end;
 
-procedure ValidarDados(campos: array of String);
+procedure ValidarCampos(campos: array of String);
 var
- Date: TDateTime;
- valida: Boolean;
- data, documento, historico, valor, saldo, color: String;
+  Date: TDateTime;
+  valida: Boolean;
+  data, documento, historico, valor, saldo, color: String;
 begin
   valida:= false;
 
   if TryStrToDate(campos[0], Date, 'yy-mm-dd', '/') then
   begin
 
-    data:= campos[0];
-    documento:= campos[1];
-    historico:= campos[2];
-    valor:= ModificaValor(campos[3]);
-    saldo:= ModificaValor(campos[4]);
+    data:= DateToStr(Date);
+    documento:= Trim(campos[1]);
+    historico:= Trim(campos[2]);
+    try
+      valor:= ModificaFormato(Trim(campos[3]));
+      saldo:= ModificaFormato(Trim(campos[4]));
+    except
+      Exit;
+    end;
 
     if saldo.Contains('-') then color:='red'
     else color:='lightgray';
@@ -155,41 +143,74 @@ begin
     if (linha.Chars[i] <> ';') and (linha.Chars[i] <> '"')  then campos[j]:= campos[j]+linha.Chars[i]
     else if linha.Chars[i] <> '"' then Inc(j);
   end;
-  ValidarDados(campos);
+
+  ValidarCampos(campos);
 end;
 
-procedure leArquivo();
+procedure MensagemErro(msg: String);
+begin
+  ShowMessage(msg);
+  arquivoDestino.Free;
+  arquivoOrigem.Free;
+  Principal.btSalvar.Enabled:=false;
+  Principal.Edit2.Clear;
+end;
+
+procedure CriaTabela();
 var
-  arquivoOrigem: TStringList;
   i: integer;
 begin
   arquivoOrigem:= TStringList.Create;
+  arquivoOrigem.LoadFromFile(Principal.Edit2.text);
 
-  try
-    arquivoOrigem.LoadFromFile(nomeArquivo);
-    if arquivoDestino = nil then CriaTabela();
-    i:=0;
-    while i < arquivoOrigem.Count-1 do
+  CriaCabecalho();
+
+  i:=0;
+  while i <= arquivoOrigem.Count-1 do
+  begin
+    if Trim(arquivoOrigem[i]) = '' then
+    begin
+      MensagemErro('Arquivo inválido.');
+      Exit;
+    end
+    else
     begin
       SeparaCampos(arquivoOrigem[i]);
       Inc(i);
     end;
-    if (i = 0) and (cont < 1) then
-    begin
-     ShowMessage('Arquivo de entrada inválido.');
-     arquivoOrigem.Free;
-     Exit;
-    end;
-    Principal.btSalvar.Enabled:=true;
-    Principal.btSalvar.SetFocus;
-  finally
-    arquivoOrigem.Free;
   end;
 end;
 
 { TPrincipal }
 
-procedure TPrincipal.btCarregarClick(Sender: TObject);
+procedure TPrincipal.btSalvarClick(Sender: TObject);
+var
+  data, hora: String;
+begin
+
+  try
+    if numLinhasTabela = 0 then
+    begin
+     MensagemErro('Aquivo inválido.');
+     Exit;
+    end
+    else
+    begin
+      data:= StringReplace(DateToStr(Date()), '/', '.', [rfReplaceAll]);
+      hora:= StringReplace(TimeToStr(Time()), ':', '.', [rfReplaceAll]);
+      if Edit1.Text = '' then Edit1.Text:=Edit1.TextHint;
+      arquivoDestino.SaveToFile(Edit1.Text+'\EXTRATO - ' + data  + ' - ' + hora + '.html');
+      ShowMessage('Arquivo Salvo');
+      btSalvar.Enabled:=false;
+      Edit2.Clear;
+    end;
+  except
+    MensagemErro('Arquivo Inválido.');
+  end;
+
+end;
+
+procedure TPrincipal.btCarregarCsvClick(Sender: TObject);
 var
   open: TOpenDialog;
 begin
@@ -199,23 +220,17 @@ begin
     open.Filter:='Arquivo CSV | *.csv';
     open.Execute;
     Edit2.Text:= open.FileName;
-    nomeArquivo:= open.FileName;
+
+    btSalvar.Enabled:=true;
+    btSalvar.SetFocus;
+    if FileExists(open.FileName) then CriaTabela();
   finally
     open.Free;
   end;
 
-  if FileExists(nomeArquivo) then leArquivo()
-  else ShowMessage('Selecione um arquivo válido.');
-
 end;
 
-procedure TPrincipal.btSalvarClick(Sender: TObject);
-begin
-  if (Edit1.Text = '') then SalvarArquivoDestino(Edit1.TextHint)
-  else SalvarArquivoDestino(Edit1.Text);
-end;
-
-procedure TPrincipal.btSelecionarClick(Sender: TObject);
+procedure TPrincipal.btSelecionarPastaClick(Sender: TObject);
 var
   open: TSelectDirectoryDialog;
 begin
